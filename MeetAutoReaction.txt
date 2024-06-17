@@ -1,0 +1,64 @@
+const autoReactions = {
+  intervalId: null,
+  emojiSelectors: {
+    '💖': '[role=button] [aria-label="💖"]',
+    '👍': '[role=button] [aria-label="👍"]',
+    '🎉': '[role=button] [aria-label="🎉"]',
+    '👏': '[role=button] [aria-label="👏"]',
+    '😂': '[role=button] [aria-label="😂"]',
+    '😮': '[role=button] [aria-label="😮"]',
+    '😢': '[role=button] [aria-label="😢"]',
+    '🤔': '[role=button] [aria-label="🤔"]',
+    '👎': '[role=button] [aria-label="👎"]',
+  },
+
+  reactionPanelOpen: false,
+  startReacting(emoji, delay) {
+    if (!this.emojiSelectors[emoji]) {
+      throw new Error(
+        `Invalid emoji. Valid emojis are: ${Object.keys(
+          this.emojiSelectors
+        ).join(', ')}`
+      );
+    }
+
+    const reactionPaletteButton = document.querySelector(
+      '[role=button][aria-label="Send a reaction"]'
+    );
+
+    if (!this.reactionPanelOpen) {
+      reactionPaletteButton.click();
+      this.reactionPanelOpen = true;
+    }
+
+    setTimeout(() => {
+      const emojiButton = document.querySelector(this.emojiSelectors[emoji]);
+
+      this.intervalId = setInterval(() => {
+        if (
+          !reactionPaletteButton.ariaPressed ||
+          reactionPaletteButton.ariaPressed === 'false'
+        ) {
+          this.stopReacting();
+          console.log('Reaction palette was closed, stopping auto reactions.');
+          return;
+        }
+        emojiButton.click();
+      }, delay);
+    }, 500);
+  },
+
+  stopReacting() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+      console.log('Auto reactions stopped.');
+    }
+  },
+};
+
+autoReactions.startReacting('🎉', 1000);
+
+setTimeout(() => {
+  autoReactions.stopReacting();
+}, 10000);
